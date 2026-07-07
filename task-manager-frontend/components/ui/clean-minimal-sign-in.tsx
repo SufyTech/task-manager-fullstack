@@ -10,6 +10,7 @@ const SignIn2 = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -28,6 +29,7 @@ const SignIn2 = () => {
       return;
     }
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
@@ -36,7 +38,8 @@ const SignIn2 = () => {
         if (result.user_id) {
           const loginResult = await login(email, password);
           if (loginResult.access_token) {
-            router.push("/tasks");
+            setSuccessMsg("Account created! Redirecting...");
+            setTimeout(() => router.push("/tasks"), 800);
             return;
           } else {
             setError("Signup worked, please log in.");
@@ -48,7 +51,8 @@ const SignIn2 = () => {
       } else {
         const result = await login(email, password);
         if (result.access_token) {
-          router.push("/tasks");
+          setSuccessMsg("Welcome back! Redirecting...");
+          setTimeout(() => router.push("/tasks"), 800);
           return;
         } else {
           setError(result.detail || "Login failed");
@@ -113,6 +117,11 @@ const SignIn2 = () => {
           <div className="w-full flex justify-between items-center">
             {error && (
               <div className="text-sm text-red-500 text-left">{error}</div>
+            )}
+            {successMsg && (
+              <div className="text-sm text-green-600 text-left">
+                {successMsg}
+              </div>
             )}
           </div>
         </div>
