@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { LogIn, Lock, Mail } from "lucide-react";
+import { LogIn, Lock, Mail, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { login, signup } from "@/lib/api";
 
@@ -11,6 +11,7 @@ const SignIn2 = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const validateEmail = (email: string) => {
@@ -27,27 +28,44 @@ const SignIn2 = () => {
       return;
     }
     setError("");
+    setLoading(true);
 
-    if (isSignup) {
-      const result = await signup(email, password);
-      if (result.user_id) {
-        const loginResult = await login(email, password);
-        if (loginResult.access_token) {
-          router.push("/tasks");
+    try {
+      if (isSignup) {
+        const result = await signup(email, password);
+        if (result.user_id) {
+          const loginResult = await login(email, password);
+          if (loginResult.access_token) {
+            router.push("/tasks");
+            return;
+          } else {
+            setError("Signup worked, please log in.");
+            setIsSignup(false);
+          }
         } else {
-          setError("Signup worked, please log in.");
-          setIsSignup(false);
+          setError(result.detail || "Signup failed");
         }
       } else {
-        setError(result.detail || "Signup failed");
+        const result = await login(email, password);
+        if (result.access_token) {
+          router.push("/tasks");
+          return;
+        } else {
+          setError(result.detail || "Login failed");
+        }
       }
-    } else {
-      const result = await login(email, password);
-      if (result.access_token) {
-        router.push("/tasks");
-      } else {
-        setError(result.detail || "Login failed");
-      }
+    } catch (err) {
+      setError(
+        "Something went wrong. Please check your connection and try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !loading) {
+      handleSignIn();
     }
   };
 
@@ -72,8 +90,10 @@ const SignIn2 = () => {
               placeholder="Email"
               type="email"
               value={email}
-              className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
+              disabled={loading}
+              className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm disabled:opacity-60"
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="relative">
@@ -84,8 +104,10 @@ const SignIn2 = () => {
               placeholder="Password"
               type="password"
               value={password}
-              className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
+              disabled={loading}
+              className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm disabled:opacity-60"
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="w-full flex justify-between items-center">
@@ -96,12 +118,14 @@ const SignIn2 = () => {
         </div>
         <button
           onClick={handleSignIn}
-          className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2"
+          disabled={loading}
+          className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {isSignup ? "Sign Up" : "Get Started"}
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {loading ? "Please wait..." : isSignup ? "Sign Up" : "Get Started"}
         </button>
         <p
-          onClick={() => setIsSignup(!isSignup)}
+          onClick={() => !loading && setIsSignup(!isSignup)}
           className="text-xs text-gray-500 cursor-pointer hover:underline"
         >
           {isSignup
