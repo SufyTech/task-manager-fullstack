@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const NEXT_PUBLIC_API_URL = "https://task-manager-fullstack-c4uj.onrender.com";
 
 function getToken(): string | null {
   return localStorage.getItem("access_token");
@@ -13,7 +13,7 @@ function authHeaders() {
 
 // ---- AUTH ----
 export async function signup(email: string, password: string) {
-  const res = await fetch(`${BASE_URL}/auth/signup`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -22,7 +22,7 @@ export async function signup(email: string, password: string) {
 }
 
 export async function login(email: string, password: string) {
-  const res = await fetch(`${BASE_URL}/auth/login`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -36,7 +36,7 @@ export async function login(email: string, password: string) {
 
 // ---- TASKS ----
 export async function getTasks(status: string | null = null, page = 1, limit = 10) {
-  let url = `${BASE_URL}/api/tasks?page=${page}&limit=${limit}`;
+  let url = `${NEXT_PUBLIC_API_URL}/api/tasks?page=${page}&limit=${limit}`;
   if (status) url += `&status=${status}`;
   const res = await fetch(url, { headers: authHeaders() });
   const data = await res.json();
@@ -45,7 +45,7 @@ export async function getTasks(status: string | null = null, page = 1, limit = 1
 }
 
 export async function createTask(title: string, categoryId: string | null = null) {
-  const res = await fetch(`${BASE_URL}/api/tasks`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/api/tasks`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ title, category_id: categoryId }),
@@ -54,7 +54,7 @@ export async function createTask(title: string, categoryId: string | null = null
 }
 
 export async function updateTask(taskId: string, updates: Record<string, any>) {
-  const res = await fetch(`${BASE_URL}/api/tasks/${taskId}`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/api/tasks/${taskId}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify(updates),
@@ -63,7 +63,7 @@ export async function updateTask(taskId: string, updates: Record<string, any>) {
 }
 
 export async function deleteTask(taskId: string) {
-  const res = await fetch(`${BASE_URL}/api/tasks/${taskId}`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/api/tasks/${taskId}`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -72,14 +72,14 @@ export async function deleteTask(taskId: string) {
 
 // ---- CATEGORIES ----
 export async function getCategories() {
-  const res = await fetch(`${BASE_URL}/api/categories`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/api/categories`, {
     headers: authHeaders(),
   });
   return res.json();
 }
 
 export async function createCategory(name: string) {
-  const res = await fetch(`${BASE_URL}/api/categories`, {
+  const res = await fetch(`${NEXT_PUBLIC_API_URL}/api/categories`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ name }),
